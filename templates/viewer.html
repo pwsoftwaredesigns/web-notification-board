@@ -23,6 +23,12 @@
             border: 2px solid #007BFF; /* Blue border */
             font-weight: bold; /* Make the latest message bold */
         }
+        
+        .message-name {
+            font-size: 1.2rem; /* Smaller font size for timestamps */
+            color: #888; /* Subtle color for timestamps */
+            text-align: right;
+        }
 
         .timestamp {
             font-size: 1.2rem; /* Smaller font size for timestamps */
@@ -57,50 +63,59 @@
         // Get the number of messages (N) from URL parameters
         const N = parseInt(getQueryParam('N')) || 3; // Default to 10 if N is not specified
 
-        // Fetch and display messages from the server
-        function loadMessages() {
-            fetch(`/display?N=${N}`) // Use N in the fetch request
-                .then(response => response.json())
-                .then(data => {
-                    const messageDisplay = document.getElementById('messageDisplay');
-                    messageDisplay.innerHTML = ''; // Clear previous messages
+		// Fetch and display messages from the server
+		function loadMessages() {
+		    fetch(`/display?N=${N}`) // Use N in the fetch request
+		        .then(response => response.json())
+		        .then(data => {
+		            const messageDisplay = $('#messageDisplay');
+		            messageDisplay.empty(); // Clear previous messages
 
-                    // Loop through messages and display them
-                    data.messages.reverse().forEach(({ message, timestamp }, index) => {
-                        const messageContainer = document.createElement('div');
-                        messageContainer.classList.add('message-container');
+		            // Loop through messages and display them
+		            data.messages.reverse().forEach(({ name, message, timestamp }, index) => {
+		                // Create a Bootstrap card for each message
+		                const messageCard = $('<div class="message-container mb-3"></div>');
 
-                        // Apply special styling for the latest message
-                        if (index === 0) {
-                            messageContainer.classList.add('latest-message'); // Highlight latest message
-                        }
+		                // Apply special styling for the latest message
+		                if (index === 0) {
+		                    messageCard.addClass('latest-message'); // Highlight latest message
+		                }
 
-                        const messageElement = document.createElement('p');
-                        messageElement.classList.add('message');
-                        messageElement.innerText = message; // Set message text
-                        messageContainer.appendChild(messageElement);
+		                const messageElement = $('<p class="message"></p>').text(message); // Set message text
+		                messageCard.append(messageElement);
 
-                        const timestampElement = document.createElement('p');
-                        timestampElement.classList.add('timestamp');
-                        timestampElement.innerText = timestamp; // Set timestamp text
-                        messageContainer.appendChild(timestampElement);
+		                // Create a container for name and timestamp
+		                const nameTimestampContainer = $('<div class="d-flex justify-content-between align-items-center"></div>');
 
-                        messageDisplay.appendChild(messageContainer);
+		                // Create name element
+		                const nameElement = $('<p class="message-name mb-0"></p>').text(name); // Set name text
+		                nameTimestampContainer.append(nameElement); // Append name element
 
-                        // Create and add a divider
-                        const divider = document.createElement('div');
-                        divider.classList.add('divider');
-                        messageDisplay.appendChild(divider);
-                    });
-                })
-                .catch(error => console.error('Error:', error));
-        }
+		                // Create timestamp element
+		                const timestampElement = $('<p class="timestamp mb-0"></p>').text(timestamp); // Set timestamp text
+		                nameTimestampContainer.append(timestampElement); // Append timestamp element
 
-        // Call the function immediately when the page loads
-        loadMessages();
+		                // Append name/timestamp container to the card body
+		                messageCard.append(nameTimestampContainer);
 
-        // Fetch messages periodically (every 3 seconds)
-        setInterval(loadMessages, 3000);
+		                // Append the card to the display
+		                messageDisplay.append(messageCard);
+
+		                // Create and add a divider (optional if you want a visual separation)
+		                const divider = $('<div class="divider"></div>');
+		                messageDisplay.append(divider);
+		            });
+		        })
+		        .catch(error => console.error('Error:', error));
+		}
+
+		// Call the function immediately when the page loads
+		$(document).ready(function() {
+		    loadMessages();
+
+		    // Fetch messages periodically (every 3 seconds)
+		    setInterval(loadMessages, 3000);
+		});
     </script>
 </body>
 </html>

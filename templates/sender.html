@@ -10,6 +10,9 @@
     <div class="container mt-5">
         <h1 class="text-center">Message Sender</h1>
         <form>
+        	<div class="form-group">
+                <input type="text" class="form-control" id="nameInput" placeholder="Your Name (Anonymous)"/>
+            </div>
             <div class="form-group">
                 <textarea class="form-control" id="messageInput" rows="4" placeholder="Type your message here" required></textarea>
             </div>
@@ -23,12 +26,21 @@
     <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
     <script>
         function sendMessage() {
+        	const name = document.getElementById('nameInput').value; // Get name
             const message = document.getElementById('messageInput').value; // Get message
 
             if (!message) {
                 alert('Please enter your message.');
                 return;
             }
+            
+            // Construct the payload object
+		    const payload = {};
+		    if (name) {
+		        // Add name if provided
+		        payload.name = name;
+		    }
+		    payload.message = message;
 
             // Use the relative URL to post message data to the server
             const url = '/display';
@@ -39,7 +51,7 @@
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ message }),
+                body: JSON.stringify(payload),
             })
             .then(response => {
                 if (!response.ok) {
