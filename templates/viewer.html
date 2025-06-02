@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Message Viewer</title>
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <style>
+        .message-container {
+            background: white;
+            border-radius: 8px; /* Rounded corners */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* Subtle shadow */
+            margin-bottom: 10px;
+            padding: 15px;
+        }
+
+        .message {
+            font-size: 2rem; /* Large font size for messages */
+        }
+
+        .latest-message {
+            background-color: #e6f7ff; /* Light blue background for the latest message */
+            border: 2px solid #007BFF; /* Blue border */
+            font-weight: bold; /* Make the latest message bold */
+        }
+
+        .timestamp {
+            font-size: 1.2rem; /* Smaller font size for timestamps */
+            color: #888; /* Subtle color for timestamps */
+            text-align: right; 
+        }
+
+        .divider {
+            height: 1px; 
+            background-color: #e0e0e0; 
+            margin: 20px 0; 
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <ul id="messageDisplay" class="list-unstyled">
+            <!-- Messages will be dynamically inserted here -->
+        </ul>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <script>
+        // Function to extract parameters from the URL
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        // Get the number of messages (N) from URL parameters
+        const N = parseInt(getQueryParam('N')) || 3; // Default to 10 if N is not specified
+
+        // Fetch and display messages from the server
+        function loadMessages() {
+            fetch(`/display?N=${N}`) // Use N in the fetch request
+                .then(response => response.json())
+                .then(data => {
+                    const messageDisplay = document.getElementById('messageDisplay');
+                    messageDisplay.innerHTML = ''; // Clear previous messages
+
+                    // Loop through messages and display them
+                    data.messages.reverse().forEach(({ message, timestamp }, index) => {
+                        const messageContainer = document.createElement('div');
+                        messageContainer.classList.add('message-container');
+
+                        // Apply special styling for the latest message
+                        if (index === data.messages.length - 1) {
+                            messageContainer.classList.add('latest-message'); // Highlight latest message
+                        }
+
+                        const messageElement = document.createElement('p');
+                        messageElement.classList.add('message');
+                        messageElement.innerText = message; // Set message text
+                        messageContainer.appendChild(messageElement);
+
+                        const timestampElement = document.createElement('p');
+                        timestampElement.classList.add('timestamp');
+                        timestampElement.innerText = timestamp; // Set timestamp text
+                        messageContainer.appendChild(timestampElement);
+
+                        messageDisplay.appendChild(messageContainer);
+
+                        // Create and add a divider
+                        const divider = document.createElement('div');
+                        divider.classList.add('divider');
+                        messageDisplay.appendChild(divider);
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Call the function immediately when the page loads
+        loadMessages();
+
+        // Fetch messages periodically (every 3 seconds)
+        setInterval(loadMessages, 3000);
+    </script>
+</body>
+</html>

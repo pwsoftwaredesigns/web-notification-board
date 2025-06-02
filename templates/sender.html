@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Message Sender</title>
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Message Sender</h1>
+        <form>
+            <div class="form-group">
+                <label for="messageInput">Your Message</label>
+                <textarea class="form-control" id="messageInput" rows="4" placeholder="Type your message here" required></textarea>
+            </div>
+            <button type="button" class="btn btn-primary btn-block" onclick="sendMessage()">Send</button>
+        </form>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <script>
+        function sendMessage() {
+            const message = document.getElementById('messageInput').value; // Get message
+
+            if (!message) {
+                alert('Please enter your message.');
+                return;
+            }
+
+            // Use the relative URL to post message data to the server
+            const url = '/display';
+
+            // Send the message via a POST request
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    alert('Failed to send the message.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('There was an error sending your message.');
+            });
+
+            // Clear the text area after sending
+            document.getElementById('messageInput').value = '';
+        }
+    </script>
+</body>
+</html>
