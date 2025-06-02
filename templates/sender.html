@@ -11,10 +11,10 @@
         <h1 class="text-center">Message Sender</h1>
         <form>
             <div class="form-group">
-                <label for="messageInput">Your Message</label>
                 <textarea class="form-control" id="messageInput" rows="4" placeholder="Type your message here" required></textarea>
             </div>
             <button type="button" class="btn btn-primary btn-block" onclick="sendMessage()">Send</button>
+            <button type="button" class="btn btn-danger btn-block" onclick="clearMessages()">Clear All Messages</button>
         </form>
     </div>
 
@@ -53,6 +53,30 @@
 
             // Clear the text area after sending
             document.getElementById('messageInput').value = '';
+        }
+        
+        function clearMessages() {
+            // Show confirmation dialog
+            if (confirm('Are you sure you want to clear all messages? This action cannot be undone!')) {
+                // Send a POST request to the server to clear all messages
+                fetch('/clear', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                })
+                .then(response => {
+                    if (response.ok) {
+                        alert('All messages cleared successfully!');
+                    } else {
+                        alert('Failed to clear messages.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('There was an error clearing messages.');
+                });
+            }
         }
     </script>
 </body>

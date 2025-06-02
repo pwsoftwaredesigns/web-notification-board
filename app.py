@@ -44,6 +44,12 @@ def display_messages():
         messages_with_timestamps = [{'message': msg[0], 'timestamp': msg[1]} for msg in message_history[-n:]]
         return jsonify({'messages': messages_with_timestamps})
 
+@app.route('/clear', methods=['POST'])
+def clear_messages():
+    global message_history
+    message_history = []  # Clear all stored messages
+    return jsonify({'status': 'All messages cleared successfully!'})
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
     
