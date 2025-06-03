@@ -45,6 +45,20 @@
             background-color: #e0e0e0; 
             margin: 20px 0; 
         }
+        
+        .reply-container {
+	        margin-left: 20px; /* Indent replies */
+	        padding-left: 10px;
+	        border-left: 2px dotted darkgray;
+	    }
+	    
+	    .reply {
+	        font-size: 1.2rem;
+	    }
+	    
+	    .reply-button {
+	        margin-left: 5px;
+	    }
     </style>
 </head>
 <body>
@@ -53,6 +67,27 @@
             <!-- Messages will be dynamically inserted here -->
         </ul>
     </div>
+    
+    <!-- Modal for entering comments -->
+	<div class="modal fade" id="commentModal" tabindex="-1" role="dialog" aria-labelledby="commentModalLabel" aria-hidden="true">
+	    <div class="modal-dialog" role="document">
+	        <div class="modal-content">
+	            <div class="modal-header">
+	                <h5 class="modal-title" id="commentModalLabel">Add a Comment</h5>
+	                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	                    <span aria-hidden="true">&times;</span>
+	                </button>
+	            </div>
+	            <div class="modal-body">
+	                <textarea id="commentText" class="form-control" rows="3" placeholder="Write your comment here..."></textarea>
+	            </div>
+	            <div class="modal-footer">
+	                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+	                <button type="button" class="btn btn-primary" id="submitComment">Submit Comment</button>
+	            </div>
+	        </div>
+	    </div>
+	</div>
 
     <script src="{{ url_for('static', filename='js/jquery.slim.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
@@ -66,52 +101,79 @@
 
         // Get the number of messages (N) from URL parameters
         const N = parseInt(getQueryParam('N')) || 3; // Default to 10 if N is not specified
+        
+        // New function to handle replying to messages
+	    function replyToMessage(messageId, replyText) {
+	        // This would typically be an AJAX request to the server to append the reply
+	        fetch('/reply', {
+	            method: 'POST',
+	            headers: {
+	                'Content-Type': 'application/json'
+	            },
+	            body: JSON.stringify({messageId: messageId, reply: replyText})
+	        })
+	        .then(response => response.json())
+	        .then(data => loadMessages())
+	        .catch(error => console.error('Error:', error));
+	    }
+
+	    // Event listener for comment submission
+	    document.getElementById('submitComment').addEventListener('click', function() {
+	        const commentText = document.getElementById('commentText').value;
+	        const messageId = $('#commentModal').data('message-id');
+	        replyToMessage(messageId, commentText);
+	        $('#commentModal').modal('hide');
+	    });
 
 		// Fetch and display messages from the server
 		function loadMessages() {
-		    fetch(`/display?N=${N}`) // Use N in the fetch request
-		        .then(response => response.json())
-		        .then(data => {
-		            const messageDisplay = $('#messageDisplay');
-		            messageDisplay.empty(); // Clear previous messages
+        fetch(`/display?N=${N}`)
+            .then(response => response.json())
+            .then(data => {
+                const messageDisplay = $('#messageDisplay');
+                messageDisplay.empty();
 
-		            // Loop through messages and display them
-		            data.messages.reverse().forEach(({ name, message, timestamp }, index) => {
-		                // Create a Bootstrap card for each message
-		                const messageCard = $('<div class="message-container mb-3"></div>');
+                data.messages.reverse().forEach(({ id, name, message, timestamp, replies }, index) => {
+                    const messageCard = $('<div class="message-container mb-3"></div>');
 
-		                // Apply special styling for the latest message
-		                if (index === 0) {
-		                    messageCard.addClass('latest-message'); // Highlight latest message
-		                }
+                    if (index === 0) {
+                        messageCard.addClass('latest-message');
+                    }
 
-		                const messageElement = $('<p class="message"></p>').text(message); // Set message text
-		                messageCard.append(messageElement);
+                    const messageElement = $('<p class="message"></p>').text(message);
+                    messageCard.append(messageElement);
 
-		                // Create a container for name and timestamp
-		                const nameTimestampContainer = $('<div class="d-flex justify-content-between align-items-center"></div>');
+                    const nameTimestampContainer = $('<div class="d-flex justify-content-between align-items-center"></div>');
+                    const nameElement = $('<p class="message-name mb-0"></p>').text(name);
+                    const timestampElement = $('<p class="timestamp mb-0"></p>').text(timestamp);
+                    nameTimestampContainer.append(nameElement, timestampElement);
+                    messageCard.append(nameTimestampContainer);
 
-		                // Create name element
-		                const nameElement = $('<p class="message-name mb-0"></p>').text(name); // Set name text
-		                nameTimestampContainer.append(nameElement); // Append name element
+                    // Add interaction buttons
+                    const buttonGroup = $('<div class="reply-button-group"></div>');
+                    const thumbsUp = $('<button class="btn btn-sm btn-success reply-button">&#128077;</button>').click(() => replyToMessage(id, '👍'));
+                    const thumbsDown = $('<button class="btn btn-sm btn-danger reply-button">&#128078;</button>').click(() => replyToMessage(id, '👎'));
+                    const comment = $('<button class="btn btn-sm btn-info reply-button">&#128172;</button>').click(() => {
+                        $('#commentModal').data('message-id', id).modal('show');
+                    });
+                    
+                    buttonGroup.append(thumbsUp, thumbsDown, comment);
+                    messageCard.append(buttonGroup);
 
-		                // Create timestamp element
-		                const timestampElement = $('<p class="timestamp mb-0"></p>').text(timestamp); // Set timestamp text
-		                nameTimestampContainer.append(timestampElement); // Append timestamp element
+                    // Display any existing replies
+                    replies.forEach(reply => {
+                        const replyContainer = $('<div class="reply-container"></div>');
+                        const replyElement = $('<p class="reply"></p>').text(reply);
+                        replyContainer.append(replyElement);
+                        messageCard.append(replyContainer);
+                    });
 
-		                // Append name/timestamp container to the card body
-		                messageCard.append(nameTimestampContainer);
-
-		                // Append the card to the display
-		                messageDisplay.append(messageCard);
-
-		                // Create and add a divider (optional if you want a visual separation)
-		                const divider = $('<div class="divider"></div>');
-		                messageDisplay.append(divider);
-		            });
-		        })
-		        .catch(error => console.error('Error:', error));
-		}
+                    const divider = $('<div class="divider"></div>');
+                    messageDisplay.append(messageCard, divider);
+                });
+            })
+            .catch(error => console.error('Error:', error));
+    	}
 
 		// Call the function immediately when the page loads
 		$(document).ready(function() {
