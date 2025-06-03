@@ -29,9 +29,8 @@
         }
         
         .message-details {
-            font-size: 1.2rem; /* Smaller font size for timestamps */
-            color: #888; /* Subtle color for timestamps */
-            text-align: right;
+            font-size: 1.2rem;
+            color: #888;
         }
 
         .divider {
@@ -95,7 +94,8 @@
 
         // Get the number of messages (N) from URL parameters
         const N = parseInt(getQueryParam('N')) || 3;
-        const viewerName = getQueryParam('name'); 
+        const viewerName = getQueryParam('name');
+        const refreshRateMs = getQueryParam('refresh') !== null ? parseInt(getQueryParam('refresh')) : 3000;
         
         // New function to handle replying to messages
 	    function replyToMessage(messageId, replyText) {
@@ -149,9 +149,8 @@
 
                     const messageElement = $('<p class="message"></p>').text(message);
                     messageCard.append(messageElement);
-
-                    const nameTimestampContainer = $('<div class="text-right message-details"></div>').text(`- ${name}, ${timestamp}`);
-                    messageCard.append(nameTimestampContainer);
+                    
+                    const nameTimestampContainer = $('<div class="message-details"></div>').text(`- ${name}, ${timestamp}`);
 
                     // Add interaction buttons
                     const buttonGroup = $('<div class="reply-button-group"></div>');
@@ -162,8 +161,11 @@
                     });
                     
                     buttonGroup.append(thumbsUp, thumbsDown, comment);
-                    messageCard.append(buttonGroup);
-
+                    
+                    const detailsContainer = $('<p class="d-flex flex-wrap justify-content-between"></p>');
+                    detailsContainer.append(buttonGroup, nameTimestampContainer);
+                    messageCard.append(detailsContainer);
+                    
                     // Display any existing replies
                     replies.forEach(({ name, message, timestamp }) => {
                         const replyContainer = $('<div class="reply-container"></div>');
@@ -186,8 +188,12 @@
 		$(document).ready(function() {
 		    loadMessages();
 
-		    // Fetch messages periodically (every 3 seconds)
-		    setInterval(loadMessages, 3000);
+		    // Fetch messages periodically (if enabled)
+		    if (refreshRateMs > 0)
+		    {
+		    	console.log("Auto refresh every " + refreshRateMs + "ms");
+		    	setInterval(loadMessages, refreshRateMs);
+		    }
 		});
     </script>
 </body>
