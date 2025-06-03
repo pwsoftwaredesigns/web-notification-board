@@ -6,11 +6,9 @@ PORT = 5000
 TIMESTAMP_FORMAT = "%A, %B %m %I:%M:%S %p"
 MAX_MESSAGES = 100
 
-
 app = Flask(__name__)
 CORS(app)
 
-# Updated message history to hold a list of dictionaries
 message_history = []
 
 @app.route('/')
@@ -50,12 +48,20 @@ def display_messages():
 def add_reply():
     data = request.get_json()
     message_id = data.get('messageId')
-    reply = data.get('reply')
+    reply_text = data.get('message')
+    reply_name = data.get('name', 'Anonymous')
 
     if message_id >= len(message_history) or message_id < 0:
         return jsonify({'status': 'Invalid message ID'}), 400
 
-    message_history[message_id]['replies'].insert(0, reply)
+    timestamp = datetime.now().strftime(TIMESTAMP_FORMAT)
+    reply_data = {
+        'name': reply_name,
+        'message': reply_text,
+        'timestamp': timestamp
+    }
+    
+    message_history[message_id]['replies'].insert(0, reply_data)
     return jsonify({'status': 'Reply added successfully!'})
 
 @app.route('/clear', methods=['POST'])
@@ -66,4 +72,3 @@ def clear_messages():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=PORT)
-    
