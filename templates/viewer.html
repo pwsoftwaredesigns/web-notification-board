@@ -117,14 +117,19 @@
 	    }
 
 	    // Event listener for comment submission
-	    document.getElementById('submitComment').addEventListener('click', function() {
-	        const commentText = document.getElementById('commentText').value;
+	    $('#submitComment').on('click', function() {
+	        const commentText = $('#commentText').val();
 	        const messageId = $('#commentModal').data('message-id');
 	        
 	        replyToMessage(messageId, commentText);
 	        
 	        $('#commentModal').modal('hide');
 	        document.getElementById('commentText').value = "";
+	    });
+	    
+	    // Event listener for when the comment modal is closed
+	    $('#commentModal').on('hide.bs.modal', function() {
+	        $('#commentText').val(''); // Clear the text area
 	    });
 
 		// Fetch and display messages from the server
