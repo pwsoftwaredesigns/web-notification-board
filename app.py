@@ -53,6 +53,9 @@ def add_reply():
 
     if message_id >= len(message_history) or message_id < 0:
         return jsonify({'status': 'Invalid message ID'}), 400
+        	
+    if not reply_text:
+    	return jsonify({'status': 'Message is required'}), 400
 
     timestamp = datetime.now().strftime(TIMESTAMP_FORMAT)
     reply_data = {
