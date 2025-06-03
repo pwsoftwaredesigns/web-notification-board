@@ -52,13 +52,24 @@
 	    .reply-button {
 	        margin-left: 5px;
 	    }
+	    
+	    #clock {
+	    	background-color: black;
+	        font-size: 4rem; /* Large font size for the clock */
+	        text-align: center; /* Center the clock text */
+	        margin-bottom: 20px; /* Add some space below the clock */
+	        font-weight: bold; /* Make the latest message bold */
+	    }
     </style>
 </head>
 <body>
     <div class="container-fluid mt-5">
-        <ul id="messageDisplay" class="list-unstyled">
-            <!-- Messages will be dynamically inserted here -->
-        </ul>
+    	<div id="clock" class="text-light text-center fixed-top" style="z-index: 1000;"></div> <!-- Clock container -->
+    	<div id="messageDisplayContainer" class="mt-5 pt-5">
+	        <ul id="messageDisplay" class="list-unstyled">
+	            <!-- Messages will be dynamically inserted here -->
+	        </ul>
+	    </div>
     </div>
     
     <!-- Modal for entering comments -->
@@ -96,6 +107,23 @@
         const N = parseInt(getQueryParam('N')) || 3;
         const viewerName = getQueryParam('name');
         const refreshRateMs = getQueryParam('refresh') !== null ? parseInt(getQueryParam('refresh')) : 3000;
+        
+        function updateClock() {
+	        const now = new Date();
+	        let hours = now.getHours();
+	        const minutes = now.getMinutes().toString().padStart(2, '0');
+	        const seconds = now.getSeconds().toString().padStart(2, '0');
+	        
+	        // Determine AM or PM suffix
+	        const amPm = hours >= 12 ? 'PM' : 'AM';
+
+	        // Convert 24-hour time format to 12-hour time format
+	        hours = hours % 12;
+	        hours = hours ? hours : 12; // The hour '0' should be '12'
+
+	        const timeString = `${hours}:${minutes}:${seconds} ${amPm}`;
+	        $('#clock').text(timeString);
+	    }
         
         // New function to handle replying to messages
 	    function replyToMessage(messageId, replyText) {
@@ -186,6 +214,17 @@
 
 		// Call the function immediately when the page loads
 		$(document).ready(function() {
+			const showClock = getQueryParam('clock') === 'true';
+			
+			if (showClock) {
+	            $('#clock').show();  // Show the clock
+	            updateClock();  // Display current time
+	            setInterval(updateClock, 1000);  // Update every second
+	        } else {
+	        	$('#messageDisplayContainer').removeClass('mt-5 pt-5'); //Remove extra space above message container if clock disabled
+	            $('#clock').hide();  // Hide the clock if parameter is not set or false
+	        }
+			
 		    loadMessages();
 
 		    // Fetch messages periodically (if enabled)
