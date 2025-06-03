@@ -20,7 +20,7 @@
                 <input type="text" class="form-control" id="nameInput" placeholder="Your Name (Anonymous)"/>
             </div>
             <div class="form-group">
-                <textarea class="form-control" id="messageInput" rows="4" placeholder="Type your message here" required></textarea>
+                <textarea class="form-control" id="messageInput" rows="4" placeholder="Type your message here&#10;Press ENTER to send&#10;Press SHIFT+ENTER to add a new line" required></textarea>
             </div>
             <button type="button" class="btn btn-primary btn-block" onclick="sendMessage()">Send</button>
             <button type="button" class="btn btn-danger btn-block" onclick="clearMessages()">Clear All Messages</button>
@@ -31,6 +31,16 @@
     <script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
     <script>
+    	$(document).ready(function () {
+	        $('#messageInput').keypress(function (event) {
+	            // Check if Enter is pressed without Shift
+	            if (event.which === 13 && !event.shiftKey) {
+	                event.preventDefault();  // Prevent adding a newline
+	                sendMessage();  // Call sendMessage function
+	            }
+	        });
+	    });
+    	
         function sendMessage() {
         	const name = document.getElementById('nameInput').value; // Get name
             const message = document.getElementById('messageInput').value; // Get message
