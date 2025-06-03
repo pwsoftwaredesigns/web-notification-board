@@ -159,9 +159,10 @@
                     // Display any existing replies
                     replies.forEach(({ name, message, timestamp }) => {
                         const replyContainer = $('<div class="reply-container"></div>');
-                        const replyElement = $('<p class="reply"></p>').text(message);
-                        const replyDetails = $('<span class="reply-details float-right text-muted"></span>').text(`- ${name}, ${timestamp}`);
-                        replyElement.append(replyDetails);
+                        const replyElement = $('<p class="reply d-flex flex-wrap justify-content-between"></p>');
+                        const replyMessage = $('<span class=""></span>').text(message);
+                        const replyDetails = $('<span class="reply-details text-muted"></span>').text(`- ${name}, ${timestamp}`);
+                        replyElement.append(replyMessage, replyDetails);
                         replyContainer.append(replyElement);
                         messageCard.append(replyContainer);
                     });
@@ -178,7 +179,7 @@
 		    loadMessages();
 
 		    // Fetch messages periodically (every 3 seconds)
-		    //setInterval(loadMessages, 3000);
+		    setInterval(loadMessages, 3000);
 		});
     </script>
 </body>
