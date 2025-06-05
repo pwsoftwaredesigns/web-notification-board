@@ -19,8 +19,9 @@ def index():
     arg_n = int(request.args.get('n', 3))
     arg_name = request.args.get('name')
     arg_refresh = int(request.args.get('refresh', 3000))
+    arg_osk = request.args.get('osk', 'false').lower() == 'true'
     
-    return render_template('viewer.html', arg_clock=arg_clock, arg_edit=arg_edit, arg_n=arg_n, arg_name=arg_name, arg_refresh=arg_refresh)
+    return render_template('viewer.html', arg_clock=arg_clock, arg_edit=arg_edit, arg_n=arg_n, arg_name=arg_name, arg_refresh=arg_refresh, arg_osk=arg_osk)
 
 @app.route('/sender')
 def sender():

@@ -63,6 +63,29 @@
 	        font-weight: bold; /* Make the latest message bold */
 	    }
     </style>
+    
+    {% if arg_osk %}
+    <style>
+    	#keyboard {
+	      position: fixed;
+	      bottom: 0;
+	      left: 0;
+	      right: 0;
+	      background-color: #f8f9fa;
+	      padding: 10px;
+	      display: none;
+	      border-top: 1px solid #ccc;
+	      z-index: 1100;
+	    }
+	    #keyboard .row {
+	      margin-bottom: 5px;
+	    }
+	    #keyboard .keyboard-btn
+	    {
+	    	min-width: 50px;
+	    }
+    </style>
+    {% endif %}
 </head>
 <body>
     <div class="container-fluid mt-5">
@@ -91,7 +114,7 @@
     	{% endif %}
     	
     	<!-- Message Container -->
-    	<div id="messageDisplayContainer" class="mt-5 pt-5">
+    	<div id="messageDisplayContainer" {% if arg_edit or arg_clock %} class="mt-5 pt-5" {% endif %}>
     		<div class="mt-3"></div>
 	        <ul id="messageDisplay" class="list-unstyled">
 	            <!-- Messages will be dynamically inserted here -->
@@ -99,50 +122,103 @@
 	    </div>
     </div>
     
-    
     <!-- Modal for entering message text -->
-	<div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hidden="true">
+	<div class="modal fade" id="dynamicModal" tabindex="-1" role="dialog" aria-labelledby="dynamicModalLabel" aria-hidden="true">
 	    <div class="modal-dialog" role="document">
 	        <div class="modal-content">
-	            <form id="messageForm"> <!-- Start Form -->
+	            <form id="dynamicForm">
 	                <div class="modal-header">
-	                    <h5 class="modal-title" id="messageModalLabel">Send a Message</h5>
+	                    <h5 class="modal-title" id="dynamicModalLabel">Modal Title</h5>
 	                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
 	                        <span aria-hidden="true">&times;</span>
 	                    </button>
 	                </div>
 	                <div class="modal-body">
-	                    <textarea name="message" class="form-control" rows="3" placeholder="Write your message here...&#10;Press ENTER to send&#10;Press SHIFT+ENTER to add a new line" required></textarea>
+	                    <textarea name="message" class="form-control" rows="3" placeholder="" required></textarea>
 	                </div>
 	                <div class="modal-footer">
 	                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-	                    <button type="submit" class="btn btn-primary">Send</button> <!-- Submit button -->
+	                    <button type="submit" class="btn btn-primary">Send</button>
 	                </div>
-	            </form> <!-- End Form -->
+	            </form>
 	        </div>
 	    </div>
 	</div>
-    
-    <!-- Modal for entering reply text -->
-	<div class="modal fade" id="commentModal" tabindex="-1" role="dialog" aria-labelledby="commentModalLabel" aria-hidden="true">
-	    <div class="modal-dialog" role="document">
-	        <div class="modal-content">
-	            <div class="modal-header">
-	                <h5 class="modal-title" id="commentModalLabel">Add a Reply</h5>
-	                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-	                    <span aria-hidden="true">&times;</span>
-	                </button>
-	            </div>
-	            <div class="modal-body">
-	                <textarea id="message" class="form-control" rows="3" placeholder="Write your reply here..."></textarea>
-	            </div>
-	            <div class="modal-footer">
-	                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-	                <button type="button" class="btn btn-primary" id="submitComment">Reply</button>
-	            </div>
-	        </div>
-	    </div>
+	
+	
+	{% if arg_osk %}
+	<!-- On-Screen Keyboard -->
+	<div id="keyboard">
+		<!-- Numbers Row -->
+		<div class="row justify-content-center">
+			<div class="col-7 d-flex justify-content-center align-items-center">
+				<button class="btn btn-lg flex-fill m-1 btn-secondary keyboard-btn" data-key="1">1</button>
+				<button class="btn btn-lg flex-fill m-1 btn-secondary keyboard-btn" data-key="2">2</button>
+				<button class="btn btn-lg flex-fill m-1 btn-secondary keyboard-btn" data-key="3">3</button>
+				<button class="btn btn-lg flex-fill m-1 btn-secondary keyboard-btn" data-key="4">4</button>
+				<button class="btn btn-lg flex-fill m-1 btn-secondary keyboard-btn" data-key="5">5</button>
+				<button class="btn btn-lg flex-fill m-1 btn-secondary keyboard-btn" data-key="6">6</button>
+				<button class="btn btn-lg flex-fill m-1 btn-secondary keyboard-btn" data-key="7">7</button>
+				<button class="btn btn-lg flex-fill m-1 btn-secondary keyboard-btn" data-key="8">8</button>
+				<button class="btn btn-lg flex-fill m-1 btn-secondary keyboard-btn" data-key="9">9</button>
+				<button class="btn btn-lg flex-fill m-1 btn-secondary keyboard-btn" data-key="0">0</button>
+				<button class="btn btn-lg flex-fill m-1 btn-secondary keyboard-btn backspace" data-key="backspace">⌫</button>
+			</div>
+		</div>
+		<!-- First Row -->
+		<div class="row justify-content-center">
+			<div class="col-7 d-flex justify-content-center align-items-center">
+				<button class="btn btn-lg flex-fill m-1 btn-secondary keyboard-btn" data-key="q">Q</button>
+				<button class="btn btn-lg flex-fill m-1 btn-secondary keyboard-btn" data-key="w">W</button>
+				<button class="btn btn-lg flex-fill m-1 btn-secondary keyboard-btn" data-key="e">E</button>
+				<button class="btn btn-lg flex-fill m-1 btn-secondary keyboard-btn" data-key="r">R</button>
+				<button class="btn btn-lg flex-fill m-1 btn-secondary keyboard-btn" data-key="t">T</button>
+				<button class="btn btn-lg flex-fill m-1 btn-secondary keyboard-btn" data-key="y">Y</button>
+				<button class="btn btn-lg flex-fill m-1 btn-secondary keyboard-btn" data-key="u">U</button>
+				<button class="btn btn-lg flex-fill m-1 btn-secondary keyboard-btn" data-key="i">I</button>
+				<button class="btn btn-lg flex-fill m-1 btn-secondary keyboard-btn" data-key="o">O</button>
+				<button class="btn btn-lg flex-fill m-1 btn-secondary keyboard-btn" data-key="p">P</button>
+			</div>
+		</div>
+		<!-- Second Row -->
+		<div class="row justify-content-center">
+			<div class="col-7 d-flex justify-content-center align-items-center">
+				<button class="btn btn-lg flex-fill m-1 btn-secondary keyboard-btn" data-key="a">A</button>
+				<button class="btn btn-lg flex-fill m-1 btn-secondary keyboard-btn" data-key="s">S</button>
+				<button class="btn btn-lg flex-fill m-1 btn-secondary keyboard-btn" data-key="d">D</button>
+				<button class="btn btn-lg flex-fill m-1 btn-secondary keyboard-btn" data-key="f">F</button>
+				<button class="btn btn-lg flex-fill m-1 btn-secondary keyboard-btn" data-key="g">G</button>
+				<button class="btn btn-lg flex-fill m-1 btn-secondary keyboard-btn" data-key="h">H</button>
+				<button class="btn btn-lg flex-fill m-1 btn-secondary keyboard-btn" data-key="j">J</button>
+				<button class="btn btn-lg flex-fill m-1 btn-secondary keyboard-btn" data-key="k">K</button>
+				<button class="btn btn-lg flex-fill m-1 btn-secondary keyboard-btn" data-key="l">L</button>
+				<button class="btn btn-lg flex-fill m-1 btn-secondary keyboard-btn" data-key=";">;</button>
+				<button class="btn btn-lg flex-fill m-1 btn-secondary keyboard-btn" data-key='"'>"</button>
+			</div>
+		</div>
+		<!-- Third Row -->
+		<div class="row justify-content-center">
+			<div class="col-7 d-flex justify-content-center align-items-center">
+				<button class="btn btn-lg flex-fill m-1 btn-secondary keyboard-btn shift" data-key="shift">Shift</button>
+				<button class="btn btn-lg flex-fill m-1 btn-secondary keyboard-btn" data-key="z">Z</button>
+				<button class="btn btn-lg flex-fill m-1 btn-secondary keyboard-btn" data-key="x">X</button>
+				<button class="btn btn-lg flex-fill m-1 btn-secondary keyboard-btn" data-key="c">C</button>
+				<button class="btn btn-lg flex-fill m-1 btn-secondary keyboard-btn" data-key="v">V</button>
+				<button class="btn btn-lg flex-fill m-1 btn-secondary keyboard-btn" data-key="b">B</button>
+				<button class="btn btn-lg flex-fill m-1 btn-secondary keyboard-btn" data-key="n">N</button>
+				<button class="btn btn-lg flex-fill m-1 btn-secondary keyboard-btn" data-key="m">M</button>
+				<button class="btn btn-lg flex-fill m-1 btn-secondary keyboard-btn" data-key=",">,</button>
+				<button class="btn btn-lg flex-fill m-1 btn-secondary keyboard-btn" data-key=".">.</button>
+			</div>
+		</div>
+		<!-- Fourth Row -->
+		<div class="row justify-content-center">
+			<div class="col-7 d-flex justify-content-center align-items-center">
+				<button class="btn btn-lg btn-secondary keyboard-btn space" data-key="spacebar" style="flex: 1;">Space</button>
+			</div>
+		</div>
 	</div>
+	{% endif %}
 
     <script src="{{ url_for('static', filename='js/jquery.slim.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
@@ -152,6 +228,50 @@
         const viewerName = "{{ arg_name }}";
         const refreshRateMs = {{ arg_refresh }};
         
+        /**
+        * @brief Show an input modal
+        */
+        function inputModal(title, placeholder, data = null) {
+		    return new Promise((resolve) => {
+		        const modal = $('#dynamicModal');
+		        const form = modal.find('form');
+		        const modalTitle = modal.find('.modal-title');
+		        const textarea = modal.find('textarea');
+
+		        // Set modal title and textarea placeholder
+		        modalTitle.text(title);
+		        textarea.attr('placeholder', placeholder + "\nPress ENTER to send\nPress SHIFT+ENTER to add a new line");
+
+		        // Handle form submission
+		        form.off('submit').on('submit', function(event) {
+		            event.preventDefault(); // Prevent the form from actually submitting
+		            const message = textarea.val(); // Get the value
+		            modal.modal('hide'); // Hide the modal
+		            resolve({message, data}); // Resolve the promise with the message and optional data
+		        });
+
+		        // Show the modal
+		        modal.modal('show');
+
+		        // Clear the textarea when modal closes
+		        modal.on('hidden.bs.modal', function () {
+		            textarea.val('');
+		        });
+		        
+		        // Handle enter events in message form text area
+		        textarea.keypress(function (event) {
+		            // Check if Enter is pressed without Shift
+		            if (event.which === 13 && !event.shiftKey) {
+		                event.preventDefault(); // Prevent adding a newline
+		                form.submit();
+		            }
+		        });
+		    });
+		}
+        
+        /**
+        * @brief Refresh the clock display
+        */
         function updateClock() {
 	        const now = new Date();
 	        let hours = now.getHours();
@@ -203,7 +323,6 @@
 		                }
 		            })
 		            .catch(error => {
-		                console.error('Error:', error);
 		                reject(error);
 		            });
 		    });
@@ -229,7 +348,6 @@
 	                }
 	            })
 	            .catch(error => {
-	                console.error('Error:', error);
 	                reject(error);
 	            });
 	        });
@@ -237,21 +355,30 @@
         
         // New function to handle replying to messages
 	    function replyToMessage(messageId, replyText) {
-	    	var payload = {};
-	    	if (viewerName) payload.name = viewerName;
-	    	payload.messageId = messageId;
-	    	payload.message = replyText;
-	    	
-	        fetch('/reply', {
-	            method: 'POST',
-	            headers: {
-	                'Content-Type': 'application/json'
-	            },
-	            body: JSON.stringify(payload)
-	        })
-	        .then(response => response.json())
-	        .then(() => loadMessages())
-	        .catch(error => console.error('Error:', error));
+	    	return new Promise((resolve, reject) => {
+		    	var payload = {};
+		    	if (viewerName) payload.name = viewerName;
+		    	payload.messageId = messageId;
+		    	payload.message = replyText;
+		    	
+		        fetch('/reply', {
+		            method: 'POST',
+		            headers: {
+		                'Content-Type': 'application/json'
+		            },
+		            body: JSON.stringify(payload)
+		        })
+		        .then(response => {
+		        	if (response.ok) {
+		        		resolve();
+		        	} else {
+		        		reject('Error');
+		        	}
+		        })
+		        .catch(error => {
+		        	reject(error)
+		        });
+		    });
 	    }
 
 		// Fetch and display messages from the server
@@ -275,12 +402,19 @@
                     const nameTimestampContainer = $('<div class="message-details"></div>').text(`- ${name}, ${timestamp}`);
 
                     // Add interaction buttons
-                    const buttonGroup = $('<div class="reply-button-group"></div>');
-                    const thumbsUp = $('<button class="btn btn-lg btn-success reply-button">&#128077;</button>').click(() => replyToMessage(id, '👍'));
-                    const thumbsDown = $('<button class="btn btn-lg btn-danger reply-button">&#128078;</button>').click(() => replyToMessage(id, '👎'));
-                    const comment = $('<button class="btn btn-lg btn-info reply-button">&#128172;</button>').click(() => {
-                        $('#commentModal').data('message-id', id).modal('show');
-                    });
+					const buttonGroup = $('<div class="reply-button-group"></div>');
+					const thumbsUp = $('<button class="btn btn-lg btn-success reply-button">&#128077;</button>').click(() => replyToMessage(id, '👍').then(() => loadMessages()));
+					const thumbsDown = $('<button class="btn btn-lg btn-danger reply-button">&#128078;</button>').click(() => replyToMessage(id, '👎').then(() => loadMessages()));
+					const comment = $('<button class="btn btn-lg btn-info reply-button">&#128172;</button>').click(() => {
+						inputModal("Reply to a message", "Enter your reply here...", {id}).then(({message, data}) => {
+							replyToMessage(data.id, message).then(() => {
+								loadMessages();
+							}).catch(error => {
+								alert("Error sending reply: " + error)
+								console.error("Error sending reply: ", error);
+							});
+						});
+					});
                     
                     buttonGroup.append(thumbsUp, thumbsDown, comment);
                     
@@ -307,7 +441,7 @@
     	}
 
 		// Call the function immediately when the page loads
-		$(document).ready(function() {	
+		$(document).ready(function() {
 			{% if arg_clock %}
 			updateClock();  // Display current time
 	        setInterval(updateClock, 1000);  // Update every second
@@ -315,54 +449,16 @@
 
 	        // Event listender to show new message modal
 	        $('#btnSendMessage').on('click', function() {
-	        	$('#messageModal').modal('show');
+	        	inputModal("Send a message", "Enter your message here...").then(({message, data}) => {
+	        		sendMessage(message, viewerName).then(() => {
+			        	loadMessages();
+			        }).catch(error => {
+			        	alert("Error sending message: " + error)
+			        	console.error("Error sending message: ", error);
+			        });
+	        	});
 	        });
 	        
-	        // Handle enter events in message form text area
-	        $('#messageForm [name="message"]').keypress(function (event) {
-	        	console.log("EVENT");
-	            // Check if Enter is pressed without Shift
-	            if (event.which === 13 && !event.shiftKey) {
-	                event.preventDefault(); // Prevent adding a newline
-	                $('#messageForm').submit();
-	            }
-	        });
-			
-			// Event listener for new message submission
-		    $('#messageForm').on('submit', function(event) {
-		    	event.preventDefault(); // Prevent the default form submission behavior (i.e., page reload)
-		    	
-		        const message = $(this).find('[name="message"]').val();
-		        
-		        sendMessage(message, viewerName).then(() => {
-		        	loadMessages();
-		        	$('#messageModal').modal('hide');
-		        }).catch(error => {
-		        	alert("Error sending message: " + error)
-		        	console.error("Error sending message: ", error);
-		        });
-		    });
-		    
-		    // Event listener for when the message modal is closed
-		    $('#messageModal').on('hide.bs.modal', function() {
-		        $('#messageForm [name="message"]').val('');
-		    });
-
-		    // Event listener for comment submission
-		    $('#submitComment').on('click', function() {
-		        const commentText = $('#commentText').val();
-		        const messageId = $('#commentModal').data('message-id');
-		        
-		        replyToMessage(messageId, commentText);
-		        
-		        $('#commentModal').modal('hide');
-		    });
-		    
-		    // Event listener for when the comment modal is closed
-		    $('#commentModal').on('hide.bs.modal', function() {
-		        $('#commentText').val(''); // Clear the text area
-		    });
-		    
 		    $('#btnClearMessages').on('click', function(){
 		    	if (confirm('Are you sure you want to clear all messages? This action cannot be undone!')) {
 		    	 	clearMessages().then(() => {
@@ -383,6 +479,89 @@
 		    	setInterval(loadMessages, refreshRateMs);
 		    }
 		});
+		
+		{% if arg_osk %}
+		$(document).ready(function () {
+			const $keyboard = $("#keyboard");
+			let shiftMode = false;
+			let capsLock = false;
+			let $activeInput = null;
+
+			// Function to show the keyboard
+			const showKeyboard = (input) => {
+				$activeInput = $(input);
+				$keyboard.show();
+			};
+
+			// Attach focus events to all `input` and `textarea`
+			const attachKeyboardListeners = () => {
+				$("input[type='text'], textarea").off("focus").on("focus", function () {
+					showKeyboard(this);
+				});
+
+				// Blur handler modified
+				$("input[type='text'], textarea").off("blur").on("blur", function () {
+					setTimeout(() => {
+						// Check if the clicked element is NOT the keyboard or an input
+						if (!$keyboard.is(":hover") && !$(document.activeElement).is("textarea, input")) {
+							$keyboard.hide();
+						}
+					}, 100);
+				});
+			};
+
+			// Call initially for existing inputs
+			attachKeyboardListeners();
+
+			// Observe DOM changes to dynamically attach events to new inputs (e.g., in modals)
+			const observer = new MutationObserver(() => {
+				attachKeyboardListeners();
+			});
+			observer.observe(document.body, { childList: true, subtree: true });
+
+			// Handle keyboard button clicks
+			$keyboard.on("click", ".keyboard-btn", function () {
+				const key = $(this).data("key");
+				if (!key || !$activeInput) return;
+
+				if (key === "shift") {
+					shiftMode = !shiftMode;
+					$(this).toggleClass("btn-primary", shiftMode);
+					$(this).toggleClass("btn-secondary", !shiftMode);
+				} else if (key === "caps") {
+					capsLock = !capsLock;
+					$(this).toggleClass("btn-primary", capsLock);
+					$(this).toggleClass("btn-secondary", !capsLock);
+				} else if (key === "backspace") {
+					$activeInput.val($activeInput.val().slice(0, -1));
+				} else if (key === "spacebar") {
+					// Adding space to the active input or textarea
+					const currentVal = $activeInput.val();
+					$activeInput.val(currentVal + " "); // Ensures space is correctly added
+				} else {
+					let char = key;
+					if (capsLock || shiftMode) char = char.toUpperCase();
+					const currentVal = $activeInput.val();
+					$activeInput.val(currentVal + char);
+
+					// Reset shift mode after one character
+					if (shiftMode) {
+						shiftMode = false;
+						$(".shift").removeClass("btn-primary");
+						$(".shift").addClass("btn-secondary");
+					}
+				}
+
+				// Prevent the textarea from immediately losing focus
+				$activeInput.focus();
+			});
+
+			// Ensure modal inputs interact correctly with the keyboard
+			$(".modal").on("focusin", "textarea, input[type='text']", function () {
+				showKeyboard(this);
+			});
+		});
+		{% endif %}
     </script>
 </body>
 </html>
