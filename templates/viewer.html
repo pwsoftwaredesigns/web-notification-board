@@ -95,7 +95,7 @@
     		<div>
     			{%if arg_edit %}
     			<!-- Send new message button -->
-    			<button id="btnSendMessage" class="btn btn-lg btn-info">&#128172;</button>
+    			<button id="btnSendMessage" class="btn btn-lg btn-info"><span class="d-none d-sm-block">New Message</span><span class="d-block d-sm-none">+</span></button>
     			{% endif %}
     		</div>	
     		
@@ -107,7 +107,7 @@
     		<div>
     			{%if arg_edit %}
     			<!-- Clear messages button -->
-    			<button id="btnClearMessages" class="btn btn-lg btn-danger reply-button">Clear</button>
+    			<button id="btnClearMessages" class="btn btn-lg btn-danger reply-button"><span class="d-none d-sm-block">Clear</span><span class="d-block d-sm-none">-</span></button>
     			{% endif %}
     		</div>
     	</div>
