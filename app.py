@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 from datetime import datetime
+import argparse 
 
 PORT = 5000
 TIMESTAMP_FORMAT = "%A, %B %m %I:%M:%S %p"
@@ -13,7 +14,13 @@ message_history = []
 
 @app.route('/')
 def index():
-    return render_template('viewer.html')
+    arg_clock = request.args.get('clock', 'false').lower() == 'true'
+    arg_edit = request.args.get('edit', 'false').lower() == 'true'
+    arg_n = int(request.args.get('n', 3))
+    arg_name = request.args.get('name')
+    arg_refresh = int(request.args.get('refresh', 3000))
+    
+    return render_template('viewer.html', arg_clock=arg_clock, arg_edit=arg_edit, arg_n=arg_n, arg_name=arg_name, arg_refresh=arg_refresh)
 
 @app.route('/sender')
 def sender():
@@ -74,4 +81,12 @@ def clear_messages():
     return jsonify({'status': 'All messages cleared successfully!'})
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Flask server for the web notification board")
+    parser.add_argument("--debug", action="store_true", help="Enable debugging mode")
+    args = parser.parse_args()
+	
+    if args.debug:
+	    #Enable autoamtic template reloading so that ap does not need to be restarted
+	    app.config['TEMPLATES_AUTO_RELOAD'] = True
+	
     app.run(host='0.0.0.0', port=PORT)

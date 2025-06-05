@@ -53,26 +53,77 @@
 	        margin-left: 5px;
 	    }
 	    
-	    #clock {
+	    #topBar {
+	    	z-index: 1000;
 	    	background-color: black;
+	    }
+	    
+	    #clock {
 	        font-size: 4rem; /* Large font size for the clock */
-	        text-align: center; /* Center the clock text */
-	        margin-bottom: 20px; /* Add some space below the clock */
 	        font-weight: bold; /* Make the latest message bold */
 	    }
     </style>
 </head>
 <body>
     <div class="container-fluid mt-5">
-    	<div id="clock" class="text-light text-center fixed-top" style="z-index: 1000;"></div> <!-- Clock container -->
+    	{% if arg_edit or arg_clock %}
+    	<!-- Top bar -->
+    	<div id="topBar" class="container-fluid d-flex flex-wrap justify-content-between align-items-center fixed-top border-bottom">
+    		<div>
+    			{%if arg_edit %}
+    			<!-- Send new message button -->
+    			<button id="btnSendMessage" class="btn btn-lg btn-info">&#128172;</button>
+    			{% endif %}
+    		</div>	
+    		
+    		{% if arg_clock %}
+    		<!-- Clock -->
+    		<div id="clock" class="text-light text-center"></div>
+    		{% endif %}
+    		
+    		<div>
+    			{%if arg_edit %}
+    			<!-- Clear messages button -->
+    			<button id="btnClearMessages" class="btn btn-lg btn-danger reply-button">Clear</button>
+    			{% endif %}
+    		</div>
+    	</div>
+    	{% endif %}
+    	
+    	<!-- Message Container -->
     	<div id="messageDisplayContainer" class="mt-5 pt-5">
+    		<div class="mt-3"></div>
 	        <ul id="messageDisplay" class="list-unstyled">
 	            <!-- Messages will be dynamically inserted here -->
 	        </ul>
 	    </div>
     </div>
     
-    <!-- Modal for entering comments -->
+    
+    <!-- Modal for entering message text -->
+	<div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hidden="true">
+	    <div class="modal-dialog" role="document">
+	        <div class="modal-content">
+	            <form id="messageForm"> <!-- Start Form -->
+	                <div class="modal-header">
+	                    <h5 class="modal-title" id="messageModalLabel">Send a Message</h5>
+	                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	                        <span aria-hidden="true">&times;</span>
+	                    </button>
+	                </div>
+	                <div class="modal-body">
+	                    <textarea name="message" class="form-control" rows="3" placeholder="Write your message here...&#10;Press ENTER to send&#10;Press SHIFT+ENTER to add a new line" required></textarea>
+	                </div>
+	                <div class="modal-footer">
+	                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+	                    <button type="submit" class="btn btn-primary">Send</button> <!-- Submit button -->
+	                </div>
+	            </form> <!-- End Form -->
+	        </div>
+	    </div>
+	</div>
+    
+    <!-- Modal for entering reply text -->
 	<div class="modal fade" id="commentModal" tabindex="-1" role="dialog" aria-labelledby="commentModalLabel" aria-hidden="true">
 	    <div class="modal-dialog" role="document">
 	        <div class="modal-content">
@@ -83,11 +134,11 @@
 	                </button>
 	            </div>
 	            <div class="modal-body">
-	                <textarea id="commentText" class="form-control" rows="3" placeholder="Write your reply here..."></textarea>
+	                <textarea id="message" class="form-control" rows="3" placeholder="Write your reply here..."></textarea>
 	            </div>
 	            <div class="modal-footer">
 	                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-	                <button type="button" class="btn btn-primary" id="submitComment">Send</button>
+	                <button type="button" class="btn btn-primary" id="submitComment">Reply</button>
 	            </div>
 	        </div>
 	    </div>
@@ -97,16 +148,9 @@
     <script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
     <script>
-        // Function to extract parameters from the URL
-        function getQueryParam(param) {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get(param);
-        }
-
-        // Get the number of messages (N) from URL parameters
-        const N = parseInt(getQueryParam('N')) || 3;
-        const viewerName = getQueryParam('name');
-        const refreshRateMs = getQueryParam('refresh') !== null ? parseInt(getQueryParam('refresh')) : 3000;
+        const N = {{ arg_n }};
+        const viewerName = "{{ arg_name }}";
+        const refreshRateMs = {{ arg_refresh }};
         
         function updateClock() {
 	        const now = new Date();
@@ -124,6 +168,72 @@
 	        const timeString = `${hours}:${minutes}:${seconds} ${amPm}`;
 	        $('#clock').text(timeString);
 	    }
+	    
+	    /**
+	    * @brief Send a new message
+	    */
+	    function sendMessage(message, name = null) {
+		    return new Promise((resolve, reject) => {
+		        if (!message) {
+		            reject('Message is empty');
+		            return;
+		        }
+
+		        // Construct the payload object
+		        const payload = { message };
+		        if (name) {
+		            payload.name = name;
+		        }
+
+		        // Use the relative URL to post message data to the server
+		        const url = '/display';
+
+		        fetch(url, {
+		            method: 'POST',
+		            headers: {
+		                'Content-Type': 'application/json',
+		            },
+		            body: JSON.stringify(payload),
+		        })
+		            .then(response => {
+		                if (response.ok) {
+		                    resolve(); // The message was successfully sent
+		                } else {
+		                    reject('Failed to send the message');
+		                }
+		            })
+		            .catch(error => {
+		                console.error('Error:', error);
+		                reject(error);
+		            });
+		    });
+		}
+		
+		/**
+		* @brief Clear all messages
+		*/
+		function clearMessages() {
+			return new Promise((resolve, reject) => {
+	            // Send a POST request to the server to clear all messages
+	            fetch('/clear', {
+	                method: 'POST',
+	                headers: {
+	                    'Content-Type': 'application/json',
+	                },
+	            })
+	            .then(response => {
+	                if (response.ok) {
+	                   resolve();
+	                } else {
+	                    reject('Failed to clear messages.');
+	                }
+	            })
+	            .catch(error => {
+	                console.error('Error:', error);
+	                reject(error);
+	            });
+	        });
+        }
         
         // New function to handle replying to messages
 	    function replyToMessage(messageId, replyText) {
@@ -143,22 +253,6 @@
 	        .then(() => loadMessages())
 	        .catch(error => console.error('Error:', error));
 	    }
-
-	    // Event listener for comment submission
-	    $('#submitComment').on('click', function() {
-	        const commentText = $('#commentText').val();
-	        const messageId = $('#commentModal').data('message-id');
-	        
-	        replyToMessage(messageId, commentText);
-	        
-	        $('#commentModal').modal('hide');
-	        document.getElementById('commentText').value = "";
-	    });
-	    
-	    // Event listener for when the comment modal is closed
-	    $('#commentModal').on('hide.bs.modal', function() {
-	        $('#commentText').val(''); // Clear the text area
-	    });
 
 		// Fetch and display messages from the server
 		function loadMessages() {
@@ -213,17 +307,72 @@
     	}
 
 		// Call the function immediately when the page loads
-		$(document).ready(function() {
-			const showClock = getQueryParam('clock') === 'true';
+		$(document).ready(function() {	
+			{% if arg_clock %}
+			updateClock();  // Display current time
+	        setInterval(updateClock, 1000);  // Update every second
+	        {% endif %}
+
+	        // Event listender to show new message modal
+	        $('#btnSendMessage').on('click', function() {
+	        	$('#messageModal').modal('show');
+	        });
+	        
+	        // Handle enter events in message form text area
+	        $('#messageForm [name="message"]').keypress(function (event) {
+	        	console.log("EVENT");
+	            // Check if Enter is pressed without Shift
+	            if (event.which === 13 && !event.shiftKey) {
+	                event.preventDefault(); // Prevent adding a newline
+	                $('#messageForm').submit();
+	            }
+	        });
 			
-			if (showClock) {
-	            $('#clock').show();  // Show the clock
-	            updateClock();  // Display current time
-	            setInterval(updateClock, 1000);  // Update every second
-	        } else {
-	        	$('#messageDisplayContainer').removeClass('mt-5 pt-5'); //Remove extra space above message container if clock disabled
-	            $('#clock').hide();  // Hide the clock if parameter is not set or false
-	        }
+			// Event listener for new message submission
+		    $('#messageForm').on('submit', function(event) {
+		    	event.preventDefault(); // Prevent the default form submission behavior (i.e., page reload)
+		    	
+		        const message = $(this).find('[name="message"]').val();
+		        
+		        sendMessage(message, viewerName).then(() => {
+		        	loadMessages();
+		        	$('#messageModal').modal('hide');
+		        }).catch(error => {
+		        	alert("Error sending message: " + error)
+		        	console.error("Error sending message: ", error);
+		        });
+		    });
+		    
+		    // Event listener for when the message modal is closed
+		    $('#messageModal').on('hide.bs.modal', function() {
+		        $('#messageForm [name="message"]').val('');
+		    });
+
+		    // Event listener for comment submission
+		    $('#submitComment').on('click', function() {
+		        const commentText = $('#commentText').val();
+		        const messageId = $('#commentModal').data('message-id');
+		        
+		        replyToMessage(messageId, commentText);
+		        
+		        $('#commentModal').modal('hide');
+		    });
+		    
+		    // Event listener for when the comment modal is closed
+		    $('#commentModal').on('hide.bs.modal', function() {
+		        $('#commentText').val(''); // Clear the text area
+		    });
+		    
+		    $('#btnClearMessages').on('click', function(){
+		    	if (confirm('Are you sure you want to clear all messages? This action cannot be undone!')) {
+		    	 	clearMessages().then(() => {
+		    	 		loadMessages();
+		    	 	}).catch(error => {
+		    	 		alert("Error clearning message: " + error);
+		        		console.error("Error clearing message: ", error);
+		    		});
+		    	}
+		    });
 			
 		    loadMessages();
 
