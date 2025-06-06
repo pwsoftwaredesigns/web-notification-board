@@ -17,7 +17,7 @@ def index():
     arg_clock = request.args.get('clock', 'false').lower() == 'true'
     arg_edit = request.args.get('edit', 'false').lower() == 'true'
     arg_n = int(request.args.get('n', 3))
-    arg_name = request.args.get('name')
+    arg_name = request.args.get('name', 'Anonymous')
     arg_refresh = int(request.args.get('refresh', 3000))
     arg_osk = request.args.get('osk', 'false').lower() == 'true'
     

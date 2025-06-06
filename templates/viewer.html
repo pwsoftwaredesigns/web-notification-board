@@ -200,6 +200,24 @@
 	</div>
 	
 	
+	<!-- Toast Container -->
+	<div aria-live="polite" aria-atomic="true" class="d-flex justify-content-end align-items-center p-3" style="position: fixed; top: 0; right: 0; z-index: 1050;">
+	    <!-- Dynamic Toast -->
+	    <div id="alertToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-delay="5000" style="min-width: 300px;">
+	        <div class="toast-header">
+	            <strong class="mr-auto" id="toastTitle">Alert</strong>
+	            <small id="toastTime">Just now</small>
+	            <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+	                <span aria-hidden="true">&times;</span>
+	            </button>
+	        </div>
+	        <div class="toast-body" id="toastBody">
+	            <!-- Toast Body Content -->
+	        </div>
+	    </div>
+	</div>
+	
+	
 	{% if arg_osk %}
 	<!-- On-Screen Keyboard -->
 	<div id="keyboard">
@@ -284,6 +302,9 @@
         
         /**
         * @brief Show an input modal
+        * @param {String} title - The title of the modal
+        * @param {String} placeholder - Placeholder text in the input textarea
+        * @param data - Optional additional data object
         */
         function inputModal(title, placeholder, data = null) {
 		    return new Promise((resolve) => {
@@ -354,6 +375,58 @@
 		        // Show the modal
 		        modal.modal('show');
 		    });
+		}
+		
+		/**
+		 * @brief Show a toast notification.
+		 * @param {String} message - The body text of the toast.
+		 * @param {String} title - The title of the toast (default: "Alert").
+		 * @param {String} type - The type of alert (e.g., "success", "danger", "info", "warning") for styling.
+		 */
+		function showToast(message, title = "Alert", type = "info") {
+		    // Select the toast DOM elements
+		    const toast = $('#alertToast');
+		    const toastTitle = $('#toastTitle');
+		    const toastBody = $('#toastBody');
+		    const toastTime = $('#toastTime');
+
+		    // Update toast content
+		    toastTitle.text(title);
+		    toastBody.text(message);
+
+		    // Optional: Add color coding based on type
+		    let headerClass;
+		    switch (type) {
+		        case 'success':
+		            headerClass = 'bg-success text-white';
+		            break;
+		        case 'danger':
+		            headerClass = 'bg-danger text-white';
+		            break;
+		        case 'info':
+		            headerClass = 'bg-info text-white';
+		            break;
+		        case 'warning':
+		            headerClass = 'bg-warning text-dark';
+		            break;
+		        default:
+		            headerClass = 'bg-secondary text-white';
+		    }
+
+		    // Remove previous color classes and apply the new style for the header
+		    const toastHeader = toast.find('.toast-header');
+		    toastHeader.removeClass('bg-success bg-danger bg-info bg-warning bg-secondary text-white text-dark').addClass(headerClass);
+
+		    // Update time (optional)
+		    const now = new Date();
+		    toastTime.text(`${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`);
+
+		    // Display the toast
+		    toast.toast('show');
+		}
+		
+		function showErrorToast(message) {
+			showToast(message, "Error", "danger");
 		}
         
         /**
@@ -497,7 +570,7 @@
 							replyToMessage(data.id, message).then(() => {
 								loadMessages();
 							}).catch(error => {
-								alert("Error sending reply: " + error)
+								showErrorToast("Error sending reply: " + error)
 								console.error("Error sending reply: ", error);
 							});
 						});
@@ -540,7 +613,7 @@
 	        		sendMessage(message, viewerName).then(() => {
 			        	loadMessages();
 			        }).catch(error => {
-			        	alert("Error sending message: " + error)
+			        	showErrorToast("Error sending message: " + error);
 			        	console.error("Error sending message: ", error);
 			        });
 	        	});
@@ -552,7 +625,7 @@
 			    	 	clearMessages().then(() => {
 			    	 		loadMessages();
 			    	 	}).catch(error => {
-			    	 		alert("Error clearning message: " + error);
+			    	 		showErrorToast("Error clearning message: " + error);
 			        		console.error("Error clearing message: ", error);
 			    		});
 			    	}
@@ -611,7 +684,7 @@
 			// Handle keyboard button clicks
 			$keyboard.on("click", ".keyboard-btn", function () {
 				const key = $(this).data("key");
-				if (!key || !$activeInput) return;
+				if ((key === null) || !$activeInput) return;
 
 				if (key === "shift") {
 					shiftMode = !shiftMode;
