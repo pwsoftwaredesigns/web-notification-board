@@ -177,6 +177,29 @@
 	</div>
 	
 	
+	<!-- Confirmation Modal -->
+	<div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+	    <div class="modal-dialog" role="document">
+	        <div class="modal-content">
+	            <div class="modal-header">
+	                <h5 class="modal-title" id="confirmationModalLabel">Confirm Action</h5>
+	                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	                    <span aria-hidden="true">&times;</span>
+	                </button>
+	            </div>
+	            <div class="modal-body">
+	                <!-- Body text will be dynamically populated -->
+	                Are you sure you want to perform this action?
+	            </div>
+	            <div class="modal-footer">
+	                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+	                <button type="button" class="btn btn-primary" id="confirmActionButton">Confirm</button>
+	            </div>
+	        </div>
+	    </div>
+	</div>
+	
+	
 	{% if arg_osk %}
 	<!-- On-Screen Keyboard -->
 	<div id="keyboard">
@@ -297,6 +320,39 @@
 		                form.submit();
 		            }
 		        });
+		    });
+		}
+		
+		/**
+		 * @brief Show a confirmation modal.
+		 * @param {String} title - The title of the modal.
+		 * @param {String} bodyText - The text in the modal body.
+		 * @returns {Promise} Resolves to `true` if the user clicks confirm, and `false` for cancel.
+		 */
+		function showConfirmationModal(title, bodyText) {
+		    return new Promise((resolve) => {
+		        const modal = $('#confirmationModal'); // Locate the modal
+		        const modalTitle = modal.find('.modal-title'); // Title element
+		        const modalBody = modal.find('.modal-body'); // Body element
+		        const confirmButton = modal.find('#confirmActionButton'); // Confirm button
+
+		        // Update title and body text
+		        modalTitle.text(title);
+		        modalBody.text(bodyText);
+
+		        // Handle button clicks
+		        confirmButton.off('click').on('click', function () {
+		            resolve(true); // User confirmed
+		            modal.modal('hide'); // Hide the modal after confirmation
+		        });
+
+		        modal.find('.btn-secondary').off('click').on('click', function () {
+		            resolve(false); // User cancelled
+		            modal.modal('hide'); // Hide the modal after cancellation
+		        });
+
+		        // Show the modal
+		        modal.modal('show');
 		    });
 		}
         
@@ -491,14 +547,16 @@
 	        });
 	        
 		    $('#btnClearMessages').on('click', function(){
-		    	if (confirm('Are you sure you want to clear all messages? This action cannot be undone!')) {
-		    	 	clearMessages().then(() => {
-		    	 		loadMessages();
-		    	 	}).catch(error => {
-		    	 		alert("Error clearning message: " + error);
-		        		console.error("Error clearing message: ", error);
-		    		});
-		    	}
+		    	showConfirmationModal("Clear All Messages", "Are you sure you want to clear all messages? This action cannot be undone!").then((userConfirmed) => {
+		    		if (userConfirmed) {
+			    	 	clearMessages().then(() => {
+			    	 		loadMessages();
+			    	 	}).catch(error => {
+			    	 		alert("Error clearning message: " + error);
+			        		console.error("Error clearing message: ", error);
+			    		});
+			    	}
+		    	});
 		    });
 			
 		    loadMessages();
