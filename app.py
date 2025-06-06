@@ -20,8 +20,9 @@ def index():
     arg_name = request.args.get('name', 'Anonymous')
     arg_refresh = int(request.args.get('refresh', 3000))
     arg_osk = request.args.get('osk', 'false').lower() == 'true'
+    arg_notify = request.args.get('notify', 'false').lower() == 'true'
     
-    return render_template('viewer.html', arg_clock=arg_clock, arg_edit=arg_edit, arg_n=arg_n, arg_name=arg_name, arg_refresh=arg_refresh, arg_osk=arg_osk)
+    return render_template('viewer.html', arg_clock=arg_clock, arg_edit=arg_edit, arg_n=arg_n, arg_name=arg_name, arg_refresh=arg_refresh, arg_osk=arg_osk, arg_notify=arg_notify)
 
 @app.route('/sender')
 def sender():

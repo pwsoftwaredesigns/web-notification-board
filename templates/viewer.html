@@ -300,6 +300,28 @@
         const viewerName = "{{ arg_name }}";
         const refreshRateMs = {{ arg_refresh }};
         
+        let lastMessageId = null; // Store the ID of the newest message
+        
+        {% if arg_notify %}
+        /**
+        * @brief Generate/show a notification on the underlying OS
+        */
+        function showOSNotification(title, body) {
+		    if (Notification.permission === "granted") {
+		        const options = {
+		            body: body
+		        };
+
+		        const notification = new Notification(title, options);
+
+		        // Bring tab to focus when notifification clicked
+		        notification.onclick = function () {
+		            window.focus();
+		        };
+		    }
+		}
+		{% endif %}
+        
         /**
         * @brief Show an input modal
         * @param {String} title - The title of the modal
@@ -595,6 +617,19 @@
 
                     const divider = $('<div class="divider"></div>');
                     messageDisplay.append(messageCard, divider);
+                    
+                    // Check for new messages (based on ID)
+	                if (index === 0 && id !== lastMessageId) {
+	                    lastMessageId = id; // Update the latest message ID
+
+						{% if arg_notify %}
+	                    // Show a desktop notification for the new message
+	                    showOSNotification(
+	                        "New Message Received",
+	                        `${name}: ${message.substring(0, 50)}...` // Display up to 50 chars of the message
+	                    );
+	                    {% endif %}
+	                }
                 });
             })
             .catch(error => console.error('Error:', error));
@@ -722,6 +757,23 @@
 			$(".modal").on("focusin", "textarea, input[type='text']", function () {
 				showKeyboard(this);
 			});
+		});
+		{% endif %}
+		
+		{% if arg_notify %}
+		$(document).ready(function(){
+			// Request notification permissions on page load
+			if ("Notification" in window) {
+			    if (Notification.permission === "default") {
+			        Notification.requestPermission().then(permission => {
+			            if (permission === "granted") {
+			                console.log("Notification permission granted.");
+			            } else {
+			                console.log("Notification permission denied.");
+			            }
+			        });
+			    }
+			}
 		});
 		{% endif %}
     </script>
