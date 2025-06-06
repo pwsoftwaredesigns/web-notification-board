@@ -18,9 +18,18 @@
             padding: 15px;
         }
 
-        .message {
-            font-size: 3rem; /* Large font size for messages */
-        }
+		.message {
+        	font-size: 3rem; /* Large font size for messages */
+       		line-height: 1em;
+    	}
+
+		@media (max-width: 544px) {
+			.message {
+            	font-size: 1rem;
+           		line-height: 1em;
+        	}
+		}
+        
 
         .latest-message {
             background-color: #e6f7ff; /* Light blue background for the latest message */
@@ -32,6 +41,13 @@
             font-size: 1.2rem;
             color: #888;
         }
+        
+        @media (max-width: 544px) {
+	        .message-details {
+	            font-size: 0.8rem;
+	            color: #888;
+	        }
+	    }
 
         .divider {
             height: 1px; 
@@ -47,6 +63,12 @@
 	    
 	    .reply {
 	        font-size: 1.2rem;
+	        line-height: 1em;
+	    }
+	    @media (max-width: 544px) {
+	    	.reply {
+	        	font-size: 1rem;
+	    	}
 	    }
 	    
 	    .reply-button {
@@ -59,32 +81,41 @@
 	    }
 	    
 	    #clock {
-	        font-size: 4rem; /* Large font size for the clock */
-	        font-weight: bold; /* Make the latest message bold */
+	        font-size: 4rem;
+	        font-weight: bold;
 	    }
+	    
+	    @media (max-width: 544px) {
+		    #clock {
+		        font-size: 2rem;
+		        font-weight: bold;
+		    }
+		}
     </style>
     
     {% if arg_osk %}
     <style>
-    	#keyboard {
-	      position: fixed;
-	      bottom: 0;
-	      left: 0;
-	      right: 0;
-	      background-color: #f8f9fa;
-	      padding: 10px;
-	      display: none;
-	      border-top: 1px solid #ccc;
-	      z-index: 1100;
-	    }
-	    #keyboard .row {
-	      margin-bottom: 5px;
-	    }
-	    #keyboard .keyboard-btn
-	    {
-	    	min-width: 50px;
-	    }
-    </style>
+		#keyboard {
+			position: fixed;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			background-color: #f8f9fa;
+			padding: 10px;
+			display: none;
+			border-top: 1px solid #ccc;
+			z-index: 1100;
+		}
+		
+		#keyboard .row {
+			margin-bottom: 5px;
+		}
+		
+		#keyboard .keyboard-btn
+		{
+			min-width: 50px;
+		}
+	</style>
     {% endif %}
 </head>
 <body>
@@ -95,7 +126,7 @@
     		<div>
     			{%if arg_edit %}
     			<!-- Send new message button -->
-    			<button id="btnSendMessage" class="btn btn-lg btn-info"><span class="d-none d-sm-block">New Message</span><span class="d-block d-sm-none">+</span></button>
+    			<button id="btnSendMessage" class="btn btn-lg btn-info my-3"><span class="d-none d-sm-block">New Message</span><span class="d-block d-sm-none">+</span></button>
     			{% endif %}
     		</div>	
     		
@@ -107,7 +138,7 @@
     		<div>
     			{%if arg_edit %}
     			<!-- Clear messages button -->
-    			<button id="btnClearMessages" class="btn btn-lg btn-danger reply-button"><span class="d-none d-sm-block">Clear</span><span class="d-block d-sm-none">-</span></button>
+    			<button id="btnClearMessages" class="btn btn-lg btn-danger reply-button my-3"><span class="d-none d-sm-block">Clear</span><span class="d-block d-sm-none">-</span></button>
     			{% endif %}
     		</div>
     	</div>
@@ -427,7 +458,7 @@
                         const replyContainer = $('<div class="reply-container"></div>');
                         const replyElement = $('<p class="reply d-flex flex-wrap justify-content-between"></p>');
                         const replyMessage = $('<span class=""></span>').text(message);
-                        const replyDetails = $('<span class="reply-details text-muted"></span>').text(`- ${name}, ${timestamp}`);
+                        const replyDetails = $('<span class="message-details text-muted"></span>').text(`- ${name}, ${timestamp}`);
                         replyElement.append(replyMessage, replyDetails);
                         replyContainer.append(replyElement);
                         messageCard.append(replyContainer);
