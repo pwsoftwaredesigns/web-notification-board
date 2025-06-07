@@ -4,7 +4,8 @@ from datetime import datetime
 import argparse 
 
 PORT = 5000
-TIMESTAMP_FORMAT = "%A, %B %m %I:%M:%S %p"
+#TIMESTAMP_FORMAT = "%A, %B %m %I:%M:%S %p"
+TIMESTAMP_FORMAT = "%I:%M:%S %p"
 MAX_MESSAGES = 100
 
 app = Flask(__name__)
